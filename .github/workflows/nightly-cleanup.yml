@@ -23,7 +23,15 @@ jobs:
         env:
           DATABASE_URL: ${{ secrets.SUPABASE_DB_URL }}
         run: |
-          psql "$DATABASE_URL" -c "SELECT 1;"
+          echo "Testing connection to Supabase..."
+          if ! psql "$DATABASE_URL" -c "SELECT 1;" ; then
+            echo "❌ Connection failed!"
+            echo "If you see 'Network is unreachable', it is likely an IPv6 issue."
+            echo "FIX: In Supabase, go to Settings -> Database -> Connection String -> URI."
+            echo "Ensure 'Mode' is set to 'Session' (Port 5432) and use THAT string."
+            exit 1
+          fi
+          echo "✅ Connection Success!"
 
       - name: Run Periodic Cleanup Scripts
         env:
