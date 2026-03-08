@@ -37,6 +37,9 @@ jobs:
         env:
           DATABASE_URL: ${{ secrets.SUPABASE_DB_URL }}
         run: |
+          echo "🏗️ Applying Migrations..."
+          psql "$DATABASE_URL" -f sql/migrations/09-hb-rank-indexes.sql
+
           echo "🧹 Running Deduplication..."
           psql "$DATABASE_URL" -c "SET statement_timeout = '30min';" -f sql/cleanup/02-social-dedup.sql
 
@@ -45,6 +48,9 @@ jobs:
 
           echo "⭐ Running Social Rank Update..."
           psql "$DATABASE_URL" -c "SET statement_timeout = '30min';" -f sql/cleanup/07-social-rank.sql
+
+          echo "🏆 Running HB Rank Calculation..."
+          psql "$DATABASE_URL" -c "SET statement_timeout = '30min';" -f sql/cleanup/10-hb-rank-calc.sql
 
       - name: Refresh Dashboard Stats
         env:
