@@ -14,9 +14,26 @@ jobs:
 
       # Note: This is a placeholder for running SQL via Supabase CLI or psql
       # You would need to set up SUPABASE_DB_URL secret
-      - name: Run Cleanup Scripts
+      - name: Install PostgreSQL Client
         run: |
-          echo "Executing nightly database cleanup scripts..."
-          # Example: psql $SUPABASE_DB_URL -f sql/cleanup/02-social-dedup.sql
-          # Example: psql $SUPABASE_DB_URL -f sql/cleanup/05-backlink-repair.sql
-          # Example: psql $SUPABASE_DB_URL -f sql/cleanup/07-social-rank.sql
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Test Connection
+        env:
+          DATABASE_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          psql "$DATABASE_URL" -c "SELECT 1;"
+
+      - name: Run Periodic Cleanup Scripts
+        env:
+          DATABASE_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          echo "🧹 Running Deduplication..."
+          psql "$DATABASE_URL" -f sql/cleanup/02-social-dedup.sql
+
+          echo "🔗 Running Backlink Repair..."
+          psql "$DATABASE_URL" -f sql/cleanup/05-backlink-repair.sql
+
+          echo "⭐ Running Social Rank Update..."
+          psql "$DATABASE_URL" -f sql/cleanup/07-social-rank.sql
