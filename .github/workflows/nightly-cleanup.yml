@@ -45,3 +45,11 @@ jobs:
 
           echo "⭐ Running Social Rank Update..."
           psql "$DATABASE_URL" -f sql/cleanup/07-social-rank.sql
+
+      - name: Refresh Dashboard Stats
+        env:
+          DATABASE_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          echo "📊 Recalculating Dashboard KPIs (This may take 30-60 seconds)..."
+          psql "$DATABASE_URL" -c "SELECT refresh_dashboard_stats();"
+          echo "✅ Dashboard Stats Refreshed!"
