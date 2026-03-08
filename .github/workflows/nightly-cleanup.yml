@@ -50,6 +50,6 @@ jobs:
         env:
           DATABASE_URL: ${{ secrets.SUPABASE_DB_URL }}
         run: |
-          echo "📊 Recalculating Dashboard KPIs (This may take 30-60 seconds)..."
-          psql "$DATABASE_URL" -c "SET statement_timeout = '30min'; SELECT refresh_dashboard_stats();"
-          echo "✅ Dashboard Stats Refreshed!"
+          echo "📊 Recalculating Dashboard KPIs in the background..."
+          psql "$DATABASE_URL" -c "SELECT cron.schedule('manual-dashboard-refresh', '* * * * *', \$\$ SELECT refresh_dashboard_stats(); SELECT cron.unschedule('manual-dashboard-refresh'); \$\$);"
+          echo "✅ Dashboard Stats Refresh Queued!"
