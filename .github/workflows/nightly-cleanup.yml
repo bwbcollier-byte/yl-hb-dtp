@@ -52,6 +52,9 @@ jobs:
           echo "🏆 Running HB Rank Calculation..."
           psql "$DATABASE_URL" -c "SET statement_timeout = '30min';" -f sql/cleanup/10-hb-rank-calc.sql
 
+          echo "📱 Running Major Socials Migration (Instagram, YT, TikTok)..."
+          psql "$DATABASE_URL" -c "SET statement_timeout = '30min';" -f sql/cleanup/11-major-socials-migration.sql
+
       - name: Refresh Dashboard Stats
         env:
           DATABASE_URL: ${{ secrets.SUPABASE_DB_URL }}
