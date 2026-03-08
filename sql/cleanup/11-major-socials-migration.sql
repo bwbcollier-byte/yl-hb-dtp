@@ -20,7 +20,8 @@ SELECT cron.schedule(
       CAST(NULLIF(ig_follower_count, '') AS numeric), 
       CAST(NULLIF(ig_followed_count, '') AS numeric), 
       CAST(NULLIF(ig_media_count, '') AS numeric), 
-      ig_verified, 'active'
+      (LOWER(NULLIF(ig_verified, '')) = 'true'),
+      'active'
     FROM talent_profiles 
     WHERE (ig_username IS NOT NULL OR NULLIF(ig_follower_count, '') IS NOT NULL OR ig_profile_image IS NOT NULL)
     ON CONFLICT (talent_id, social_type) DO UPDATE SET
@@ -42,7 +43,8 @@ SELECT cron.schedule(
       id, 'YouTube', yt_handle, yt_title, yt_id, yt_url, 
       yt_description, yt_avatar, 
       CAST(NULLIF(yt_subscriber_count, '') AS numeric), 
-      yt_is_verified, 'active'
+      (LOWER(NULLIF(yt_is_verified, '')) = 'true' OR LOWER(NULLIF(yt_is_verified_artist, '')) = 'true'),
+      'active'
     FROM talent_profiles 
     WHERE (yt_id IS NOT NULL OR NULLIF(yt_subscriber_count, '') IS NOT NULL OR yt_handle IS NOT NULL)
     ON CONFLICT (talent_id, social_type) DO UPDATE SET
@@ -66,7 +68,8 @@ SELECT cron.schedule(
       CAST(NULLIF(tt_follower_count, '') AS numeric), 
       CAST(NULLIF(tt_following_count, '') AS numeric), 
       CAST(NULLIF(tt_video_count, '') AS numeric), 
-      tt_verified, 'active'
+      (LOWER(NULLIF(tt_verified, '')) = 'true'),
+      'active'
     FROM talent_profiles 
     WHERE (tt_id IS NOT NULL OR NULLIF(tt_follower_count, '') IS NOT NULL OR tt_username IS NOT NULL)
     ON CONFLICT (talent_id, social_type) DO UPDATE SET
@@ -84,4 +87,5 @@ SELECT cron.schedule(
     SELECT cron.unschedule('manual-major-socials-migration');
   $$
 );
+
 
