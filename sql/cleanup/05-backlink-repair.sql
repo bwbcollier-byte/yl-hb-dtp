@@ -1,36 +1,34 @@
--- 05: Repair Global social backlinks (Background Job)
--- Repairs all platform foreign keys on talent_profiles from social_profiles rows.
+-- 05: Repair hb_talent Social Backlinks
+-- For each platform, fills in the soc_* UUID FK if it's NULL
+-- but a matching hb_socials row exists for that talent.
 
 SELECT cron.schedule(
-  'manual-backlink-repair', 
-  '* * * * *', 
+  'manual-backlink-repair',
+  '* * * * *',
   $$
-    UPDATE talent_profiles tp
+    UPDATE hb_talent t
     SET
-      soc_spotify      = COALESCE(tp.soc_spotify,      (SELECT id FROM social_profiles WHERE talent_id = tp.id AND social_type = 'Spotify' LIMIT 1)),
-      soc_instagram    = COALESCE(tp.soc_instagram,    (SELECT id FROM social_profiles WHERE talent_id = tp.id AND social_type = 'Instagram' LIMIT 1)),
-      soc_tiktok       = COALESCE(tp.soc_tiktok,       (SELECT id FROM social_profiles WHERE talent_id = tp.id AND social_type = 'TikTok' LIMIT 1)),
-      soc_imdb         = COALESCE(tp.soc_imdb,         (SELECT id FROM social_profiles WHERE talent_id = tp.id AND social_type = 'IMDb' LIMIT 1)),
-      soc_facebook     = COALESCE(tp.soc_facebook,     (SELECT id FROM social_profiles WHERE talent_id = tp.id AND social_type = 'Facebook' LIMIT 1)),
-      soc_twitter      = COALESCE(tp.soc_twitter,      (SELECT id FROM social_profiles WHERE talent_id = tp.id AND social_type = 'Twitter' LIMIT 1)),
-      soc_youtube      = COALESCE(tp.soc_youtube,      (SELECT id FROM social_profiles WHERE talent_id = tp.id AND social_type = 'YouTube' LIMIT 1)),
-      soc_tmdb         = COALESCE(tp.soc_tmdb,         (SELECT id FROM social_profiles WHERE talent_id = tp.id AND social_type = 'TMDb' LIMIT 1)),
-      soc_soundcloud   = COALESCE(tp.soc_soundcloud,   (SELECT id FROM social_profiles WHERE talent_id = tp.id AND social_type = 'SoundCloud' LIMIT 1)),
-      soc_apple_music  = COALESCE(tp.soc_apple_music,  (SELECT id FROM social_profiles WHERE talent_id = tp.id AND social_type = 'Apple Music' LIMIT 1)),
-      soc_website      = COALESCE(tp.soc_website,      (SELECT id FROM social_profiles WHERE talent_id = tp.id AND social_type = 'Website' LIMIT 1)),
-      soc_deezer       = COALESCE(tp.soc_deezer,       (SELECT id FROM social_profiles WHERE talent_id = tp.id AND social_type = 'Deezer' LIMIT 1)),
-      soc_tidal        = COALESCE(tp.soc_tidal,        (SELECT id FROM social_profiles WHERE talent_id = tp.id AND social_type = 'Tidal' LIMIT 1)),
-      soc_pandora      = COALESCE(tp.soc_pandora,      (SELECT id FROM social_profiles WHERE talent_id = tp.id AND social_type = 'Pandora' LIMIT 1)),
-      soc_discogs      = COALESCE(tp.soc_discogs,      (SELECT id FROM social_profiles WHERE talent_id = tp.id AND social_type = 'Discogs' LIMIT 1)),
-      soc_allmusic     = COALESCE(tp.soc_allmusic,     (SELECT id FROM social_profiles WHERE talent_id = tp.id AND social_type = 'AllMusic' LIMIT 1)),
-      soc_bandsintown  = COALESCE(tp.soc_bandsintown,  (SELECT id FROM social_profiles WHERE talent_id = tp.id AND social_type = 'Bandsintown' LIMIT 1)),
-      soc_songkick     = COALESCE(tp.soc_songkick,     (SELECT id FROM social_profiles WHERE talent_id = tp.id AND social_type = 'Songkick' LIMIT 1)),
-      soc_musicbrainz  = COALESCE(tp.soc_musicbrainz,  (SELECT id FROM social_profiles WHERE talent_id = tp.id AND social_type = 'MusicBrainz' LIMIT 1)),
-      soc_audiodb      = COALESCE(tp.soc_audiodb,      (SELECT id FROM social_profiles WHERE talent_id = tp.id AND social_type = 'AudioDB' LIMIT 1)),
-      soc_chartmetric  = COALESCE(tp.soc_chartmetric,  (SELECT id FROM social_profiles WHERE talent_id = tp.id AND social_type = 'Chartmetric' LIMIT 1)),
-      soc_rostr        = COALESCE(tp.soc_rostr,        (SELECT id FROM social_profiles WHERE talent_id = tp.id AND social_type = 'Rostr' LIMIT 1)),
-      soc_imdbpro      = COALESCE(tp.soc_imdbpro,      (SELECT id FROM social_profiles WHERE talent_id = tp.id AND social_type = 'IMDbPro' LIMIT 1));
-      
+      soc_spotify     = COALESCE(t.soc_spotify,     (SELECT id FROM hb_socials WHERE linked_talent = t.id AND LOWER(type) = 'spotify'     LIMIT 1)),
+      soc_instagram   = COALESCE(t.soc_instagram,   (SELECT id FROM hb_socials WHERE linked_talent = t.id AND LOWER(type) = 'instagram'   LIMIT 1)),
+      soc_tiktok      = COALESCE(t.soc_tiktok,      (SELECT id FROM hb_socials WHERE linked_talent = t.id AND LOWER(type) = 'tiktok'      LIMIT 1)),
+      soc_imdb        = COALESCE(t.soc_imdb,        (SELECT id FROM hb_socials WHERE linked_talent = t.id AND LOWER(type) = 'imdb'        LIMIT 1)),
+      soc_facebook    = COALESCE(t.soc_facebook,    (SELECT id FROM hb_socials WHERE linked_talent = t.id AND LOWER(type) = 'facebook'    LIMIT 1)),
+      soc_twitter     = COALESCE(t.soc_twitter,     (SELECT id FROM hb_socials WHERE linked_talent = t.id AND LOWER(type) = 'twitter'     LIMIT 1)),
+      soc_youtube     = COALESCE(t.soc_youtube,     (SELECT id FROM hb_socials WHERE linked_talent = t.id AND LOWER(type) = 'youtube'     LIMIT 1)),
+      soc_tmdb        = COALESCE(t.soc_tmdb,        (SELECT id FROM hb_socials WHERE linked_talent = t.id AND LOWER(type) = 'tmdb'        LIMIT 1)),
+      soc_soundcloud  = COALESCE(t.soc_soundcloud,  (SELECT id FROM hb_socials WHERE linked_talent = t.id AND LOWER(type) = 'soundcloud'  LIMIT 1)),
+      soc_allmusic    = COALESCE(t.soc_allmusic,    (SELECT id FROM hb_socials WHERE linked_talent = t.id AND LOWER(type) = 'allmusic'    LIMIT 1)),
+      soc_songkick    = COALESCE(t.soc_songkick,    (SELECT id FROM hb_socials WHERE linked_talent = t.id AND LOWER(type) = 'songkick'    LIMIT 1)),
+      soc_musicbrainz = COALESCE(t.soc_musicbrainz, (SELECT id FROM hb_socials WHERE linked_talent = t.id AND LOWER(type) = 'musicbrainz' LIMIT 1)),
+      soc_chartmetric = COALESCE(t.soc_chartmetric, (SELECT id FROM hb_socials WHERE linked_talent = t.id AND LOWER(type) = 'chartmetric' LIMIT 1)),
+      soc_deezer      = COALESCE(t.soc_deezer,      (SELECT id FROM hb_socials WHERE linked_talent = t.id AND LOWER(type) = 'deezer'      LIMIT 1)),
+      soc_rostr       = COALESCE(t.soc_rostr,       (SELECT id FROM hb_socials WHERE linked_talent = t.id AND LOWER(type) = 'rostr'       LIMIT 1)),
+      soc_viberate    = COALESCE(t.soc_viberate,    (SELECT id FROM hb_socials WHERE linked_talent = t.id AND LOWER(type) = 'viberate'    LIMIT 1)),
+      soc_wikidata    = COALESCE(t.soc_wikidata,    (SELECT id FROM hb_socials WHERE linked_talent = t.id AND LOWER(type) = 'wikidata'    LIMIT 1)),
+      soc_wikipedia   = COALESCE(t.soc_wikipedia,   (SELECT id FROM hb_socials WHERE linked_talent = t.id AND LOWER(type) = 'wikipedia'   LIMIT 1))
+    WHERE t.id IN (
+      SELECT DISTINCT linked_talent FROM hb_socials WHERE linked_talent IS NOT NULL
+    );
     SELECT cron.unschedule('manual-backlink-repair');
   $$
 );

@@ -1,25 +1,23 @@
--- 07: Global Social Rank Calculation (Background Job)
--- Ranks all artists per platform based on followers_count.
+-- 07: Social Rank Calculation
+-- Ranks each hb_socials row within its platform type by follower count.
 
 SELECT cron.schedule(
-  'manual-social-rank', 
-  '* * * * *', 
+  'manual-social-rank',
+  '* * * * *',
   $$
-    UPDATE social_profiles sp
-    SET social_rank = ranked.rn
+    UPDATE hb_socials hs
+    SET rank = ranked.rn
     FROM (
       SELECT
         id,
         ROW_NUMBER() OVER (
-          PARTITION BY social_type
-          ORDER BY followers_count DESC NULLS LAST
+          PARTITION BY LOWER(type)
+          ORDER BY followers DESC NULLS LAST
         ) AS rn
-      FROM social_profiles
-      WHERE followers_count IS NOT NULL
+      FROM hb_socials
+      WHERE followers IS NOT NULL
     ) ranked
-    WHERE sp.id = ranked.id;
-    
+    WHERE hs.id = ranked.id;
     SELECT cron.unschedule('manual-social-rank');
   $$
 );
-
