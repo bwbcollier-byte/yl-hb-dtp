@@ -1,9 +1,10 @@
 name: Nightly Database Cleanup
 
 on:
-  schedule:
-    - cron: "0 2 * * *" # 2am nightly
-  workflow_dispatch: # Allow manual trigger
+  # Schedule disabled 2026-05-20 — migrated to pg_cron (cron.schedule job_id 247, `hb_cleanup.nightly()`).
+  # See Work/Engineering Ops/pg-cron-dtp-migration-draft.md and decisions.md 2026-05-20 architecture entry.
+  # workflow_dispatch retained as belt-and-braces manual fallback.
+  workflow_dispatch:
 
 
 permissions:
